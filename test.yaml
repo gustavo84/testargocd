@@ -1,0 +1,50 @@
+---
+# Source: service/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: consultas1-service
+spec:
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+# Source: service/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consultas1-deployment
+  labels:
+    app: springboot
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: consultas1
+  template:
+    metadata:
+      labels:
+        app: consultas1
+    spec:
+      containers:
+      - name: springboot
+        image: main-quay-registry-enterprise.apps.ocp-pro.infra.msc.es/unix/unix-piloto-mss-r01a-consultas1:1
+        ports:
+        - containerPort: 80
+---
+# Source: service/templates/route.yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: consultas1-route
+spec:
+  to:
+    kind: Service
+    name: consultas1-service
+    weight: 100
+  port:
+    targetPort: 80
+  wildcardPolicy: None
